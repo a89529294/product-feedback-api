@@ -3,7 +3,7 @@ import { db } from "../lib/db.js";
 import { hash } from "@node-rs/argon2";
 import { lucia } from "../lib/auth.js";
 import { generateId } from "lucia";
-import { userTable } from "../lib/schema.js";
+import { users } from "../lib/schema.js";
 
 export const signupRouter = express.Router();
 
@@ -37,7 +37,7 @@ signupRouter.post("/signup", async (req, res) => {
   const userId = generateId(15);
 
   try {
-    await db.insert(userTable).values({
+    await db.insert(users).values({
       id: userId,
       username: username,
       hashedPassword,

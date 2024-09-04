@@ -4,6 +4,7 @@ import cors from "cors";
 import { verifyRequestOrigin } from "lucia";
 import { lucia } from "./lib/auth.js";
 import { signupRouter } from "./routes/signup.js";
+import { signinRouter } from "./routes/signin.js";
 
 dotenv.config();
 const app = express();
@@ -11,6 +12,7 @@ const app = express();
 app.use(
   cors({
     origin: ["http://localhost:5173"],
+    credentials: true,
   })
 );
 app.use(express.json());
@@ -22,8 +24,6 @@ app.use((req, res, next) => {
   }
   const originHeader = req.headers.origin ?? null;
   const hostHeader = req.headers.host ?? null;
-
-  console.log(originHeader, hostHeader);
 
   if (
     !originHeader ||
@@ -37,6 +37,7 @@ app.use((req, res, next) => {
 
 app.use(async (req, res, next) => {
   const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+  console.log(sessionId);
   if (!sessionId) {
     res.locals.user = null;
     res.locals.session = null;
@@ -61,7 +62,13 @@ app.use(async (req, res, next) => {
   return next();
 });
 
-app.use(signupRouter);
+app.get("/validate-session", async (req, res) => {
+  if (!res.locals.session)
+    return res.status(403).json({ authenticated: false });
+  return res.json({ authenticated: true, username: res.locals.user.username });
+});
+
+app.use(signupRouter, signinRouter);
 
 const port = process.env.PORT;
 app.listen(port, () => {
