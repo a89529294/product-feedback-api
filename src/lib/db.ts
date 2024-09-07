@@ -13,8 +13,9 @@ const db = drizzle(pool, { schema });
 
 interface DatabaseUser {
   id: string;
-  username: string;
+  email: string;
   password_hash: string;
+  email_verified: boolean;
 }
 
 export { db, DatabaseUser };

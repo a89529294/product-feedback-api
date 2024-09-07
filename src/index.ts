@@ -5,6 +5,8 @@ import { verifyRequestOrigin } from "lucia";
 import { lucia } from "./lib/auth.js";
 import { signupRouter } from "./routes/signup.js";
 import { signinRouter } from "./routes/signin.js";
+import { signoutRouter } from "./routes/signout.js";
+import { emailVerificationRouter } from "./routes/email-verification.js";
 
 dotenv.config();
 const app = express();
@@ -37,7 +39,7 @@ app.use((req, res, next) => {
 
 app.use(async (req, res, next) => {
   const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
-  console.log(sessionId);
+
   if (!sessionId) {
     res.locals.user = null;
     res.locals.session = null;
@@ -59,16 +61,21 @@ app.use(async (req, res, next) => {
   }
   res.locals.session = session;
   res.locals.user = user;
+
   return next();
 });
 
 app.get("/validate-session", async (req, res) => {
   if (!res.locals.session)
     return res.status(403).json({ authenticated: false });
-  return res.json({ authenticated: true, username: res.locals.user.username });
+
+  return res.json({
+    email: res.locals.user.email,
+    emailVerified: res.locals.user.emailVerified,
+  });
 });
 
-app.use(signupRouter, signinRouter);
+app.use(signupRouter, signinRouter, signoutRouter, emailVerificationRouter);
 
 const port = process.env.PORT;
 app.listen(port, () => {

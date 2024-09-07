@@ -1,30 +1,27 @@
-import express from "express";
-import { db } from "../lib/db.js";
 import { hash } from "@node-rs/argon2";
+import express from "express";
+import { generateIdFromEntropySize } from "lucia";
 import { lucia } from "../lib/auth.js";
-import { generateId } from "lucia";
+import { db } from "../lib/db.js";
 import { users } from "../lib/schema.js";
+import { isValidEmail } from "../utils.js";
+import {
+  generateEmailVerificationCode,
+  sendVerificationCode,
+} from "../lib/utils.js";
 
 export const signupRouter = express.Router();
 
 signupRouter.post("/signup", async (req, res) => {
-  console.log(req.body);
-  const username: string | null = req.body.username ?? null;
-  if (
-    !username ||
-    username.length < 3 ||
-    username.length > 31 ||
-    !/^[a-z0-9_-]+$/.test(username)
-  ) {
-    return res.status(400).json({
-      error: "Invalid username",
-    });
+  const email = req.body.email ?? null;
+  const password = req.body.password ?? null;
+
+  if (!email || !isValidEmail(email)) {
+    return res.status(401).json({ message: "Invalid email" });
   }
-  const password: string | null = req.body.password ?? null;
-  if (!password || password.length < 6 || password.length > 255) {
-    return res.status(400).json({
-      error: "Invalid password",
-    });
+
+  if (!password || password.length < 6) {
+    return res.status(401).json({ message: "Invalid password" });
   }
 
   const hashedPassword = await hash(password, {
@@ -34,28 +31,30 @@ signupRouter.post("/signup", async (req, res) => {
     outputLen: 32,
     parallelism: 1,
   });
-  const userId = generateId(15);
+  const userId = generateIdFromEntropySize(10); // 16 characters long
 
   try {
     await db.insert(users).values({
       id: userId,
-      username: username,
+      email,
       hashedPassword,
+      emailVerified: false,
     });
 
+    const verificationCode = await generateEmailVerificationCode(userId, email);
+    await sendVerificationCode(email, verificationCode);
+
     const session = await lucia.createSession(userId, {});
-    return res
+    res
       .appendHeader(
         "Set-Cookie",
         lucia.createSessionCookie(session.id).serialize()
       )
       .json({
-        success: true,
+        message: "success",
       });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({
-      error: "An unknown error occurred",
-    });
+  } catch {
+    // db error, email taken, etc
+    return res.status(401).json({ message: "Email in use." });
   }
 });

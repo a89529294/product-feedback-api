@@ -1,0 +1,52 @@
+import { TimeSpan, createDate } from "oslo";
+import { generateRandomString, alphabet } from "oslo/crypto";
+import { db } from "./db.js";
+import { emailVerificationCodes } from "./schema.js";
+import { eq } from "drizzle-orm";
+import nodemailer from "nodemailer";
+
+export async function generateEmailVerificationCode(
+  userId: string,
+  email: string
+): Promise<string> {
+  await db
+    .delete(emailVerificationCodes)
+    .where(eq(emailVerificationCodes.userId, userId));
+  const code = generateRandomString(8, alphabet("0-9"));
+  await db.insert(emailVerificationCodes).values({
+    userId: userId,
+    email,
+    code,
+    expiresAt: createDate(new TimeSpan(15, "m")), // 15 minutes
+  });
+  return code;
+}
+
+export async function sendVerificationCode(
+  email: string,
+  verificationCode: string
+) {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // true for port 465, false for other ports
+    auth: {
+      user: "a89529294@gmail.com",
+      pass: "rtpn aawb tejb gbrq",
+    },
+  });
+
+  async function main() {
+    // send mail with defined transport object
+    const info = await transporter.sendMail({
+      from: "Product Feedback <a89529294@gmail.com>", // sender address
+      to: email,
+      subject: "Email Verification Code", // Subject line
+      text: verificationCode, // plain text body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+  }
+
+  main().catch(console.error);
+}
