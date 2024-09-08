@@ -1,4 +1,11 @@
-import { boolean, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -26,6 +33,19 @@ export const emailVerificationCodes = pgTable("email_verification_codes", {
     .references(() => users.id),
   email: text("email").notNull(),
   expiresAt: timestamp("expires_at", {
+    withTimezone: true,
+    mode: "date",
+  }).notNull(),
+});
+
+export const rateLimit = pgTable("rate_limit", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  path: text("path").notNull(),
+  attempts: integer("attempts").notNull(),
+  firstAttemptTime: timestamp("first_attempt_time", {
     withTimezone: true,
     mode: "date",
   }).notNull(),

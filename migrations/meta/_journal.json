@@ -29,6 +29,27 @@
       "when": 1725689408383,
       "tag": "0003_legal_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1725774153928,
+      "tag": "0004_wonderful_morph",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1725774190628,
+      "tag": "0005_fearless_blockbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1725776635807,
+      "tag": "0006_past_hydra",
+      "breakpoints": true
     }
   ]
 }

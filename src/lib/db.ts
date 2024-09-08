@@ -11,11 +11,4 @@ const pool = new pg.Pool({
 
 const db = drizzle(pool, { schema });
 
-interface DatabaseUser {
-  id: string;
-  email: string;
-  password_hash: string;
-  email_verified: boolean;
-}
-
-export { db, DatabaseUser };
+export { db };

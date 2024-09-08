@@ -60,6 +60,7 @@ signinRouter.post("/signin", async (req, res) => {
       lucia.createSessionCookie(session.id).serialize()
     )
     .json({
-      message: "success",
+      email: existingUser.email,
+      emailVerified: existingUser.emailVerified,
     });
 });
