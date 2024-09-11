@@ -50,6 +50,13 @@
       "when": 1725776635807,
       "tag": "0006_past_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1726035647833,
+      "tag": "0007_old_lady_bullseye",
+      "breakpoints": true
     }
   ]
 }

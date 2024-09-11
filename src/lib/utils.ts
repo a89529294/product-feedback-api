@@ -1,10 +1,13 @@
 import { TimeSpan, createDate } from "oslo";
+import { sha256 } from "oslo/crypto";
+import { encodeHex } from "oslo/encoding";
 import { generateRandomString, alphabet } from "oslo/crypto";
 import { db } from "./db.js";
-import { emailVerificationCodes } from "./schema.js";
+import { emailVerificationCodes, passwordResetTokens } from "./schema.js";
 import { eq } from "drizzle-orm";
 import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer/index.js";
+import { generateIdFromEntropySize } from "lucia";
 
 export async function generateEmailVerificationCode(
   userId: string,
@@ -46,4 +49,22 @@ export async function sendEmail(email: string, mailOptions: Mail.Options) {
   }
 
   await main();
+}
+
+export async function createPasswordResetToken(
+  userId: string
+): Promise<string> {
+  // optionally invalidate all existing tokens
+  await db
+    .delete(passwordResetTokens)
+    .where(eq(passwordResetTokens.userId, userId));
+
+  const tokenId = generateIdFromEntropySize(25); // 40 character
+  const tokenHash = encodeHex(await sha256(new TextEncoder().encode(tokenId)));
+  await db.insert(passwordResetTokens).values({
+    tokenHash: tokenHash,
+    userId: userId,
+    expiresAt: createDate(new TimeSpan(1, "h")),
+  });
+  return tokenId;
 }

@@ -51,5 +51,17 @@ export const rateLimit = pgTable("rate_limit", {
   }).notNull(),
 });
 
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  tokenHash: text("token_hash").notNull(),
+  expiresAt: timestamp("expires_at", {
+    withTimezone: true,
+    mode: "date",
+  }).notNull(),
+});
+
 export type DatabaseUser = typeof users.$inferSelect;
 export type NewDatabaseUser = typeof users.$inferInsert;
