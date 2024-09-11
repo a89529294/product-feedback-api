@@ -7,6 +7,7 @@ import { signupRouter } from "./routes/signup.js";
 import { signinRouter } from "./routes/signin.js";
 import { signoutRouter } from "./routes/signout.js";
 import { emailVerificationRouter } from "./routes/email-verification.js";
+import { resetPasswordRouter } from "./routes/reset-password.js";
 
 dotenv.config();
 const app = express();
@@ -75,7 +76,13 @@ app.get("/validate-session", async (req, res) => {
   });
 });
 
-app.use(signupRouter, signinRouter, signoutRouter, emailVerificationRouter);
+app.use(
+  signupRouter,
+  signinRouter,
+  signoutRouter,
+  emailVerificationRouter,
+  resetPasswordRouter
+);
 
 const port = process.env.PORT;
 app.listen(port, () => {

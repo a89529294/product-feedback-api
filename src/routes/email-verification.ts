@@ -72,7 +72,6 @@ emailVerificationRouter.post(
     }
   },
   async (req, res) => {
-    console.log("verifying email code");
     const user = res.locals.user;
 
     if (!user) {

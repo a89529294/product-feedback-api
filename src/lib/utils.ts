@@ -4,6 +4,7 @@ import { db } from "./db.js";
 import { emailVerificationCodes } from "./schema.js";
 import { eq } from "drizzle-orm";
 import nodemailer from "nodemailer";
+import Mail from "nodemailer/lib/mailer/index.js";
 
 export async function generateEmailVerificationCode(
   userId: string,
@@ -22,10 +23,7 @@ export async function generateEmailVerificationCode(
   return code;
 }
 
-export async function sendVerificationCode(
-  email: string,
-  verificationCode: string
-) {
+export async function sendEmail(email: string, mailOptions: Mail.Options) {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -41,12 +39,11 @@ export async function sendVerificationCode(
     const info = await transporter.sendMail({
       from: "Product Feedback <a89529294@gmail.com>", // sender address
       to: email,
-      subject: "Email Verification Code", // Subject line
-      text: verificationCode, // plain text body
+      ...mailOptions,
     });
 
     console.log("Message sent: %s", info.messageId);
   }
 
-  main().catch(console.error);
+  await main();
 }

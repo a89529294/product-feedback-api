@@ -5,10 +5,7 @@ import { lucia } from "../lib/auth.js";
 import { db } from "../lib/db.js";
 import { users } from "../lib/schema.js";
 import { isValidEmail } from "../utils.js";
-import {
-  generateEmailVerificationCode,
-  sendVerificationCode,
-} from "../lib/utils.js";
+import { generateEmailVerificationCode, sendEmail } from "../lib/utils.js";
 
 export const signupRouter = express.Router();
 
@@ -42,7 +39,10 @@ signupRouter.post("/signup", async (req, res) => {
     });
 
     const verificationCode = await generateEmailVerificationCode(userId, email);
-    await sendVerificationCode(email, verificationCode);
+    await sendEmail(email, {
+      subject: "Email Verification Code",
+      text: verificationCode,
+    });
 
     const session = await lucia.createSession(userId, {});
     res
