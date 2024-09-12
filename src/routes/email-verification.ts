@@ -5,72 +5,14 @@ import express from "express";
 import { db } from "../lib/db.js";
 import { emailVerificationCodes, users, rateLimit } from "../lib/schema.js";
 import { and, eq } from "drizzle-orm";
+import { rateLimitOnIp } from "../lib/middlewares.js";
+import { generateEmailVerificationCode, sendEmail } from "../lib/utils.js";
 
 export const emailVerificationRouter = express.Router();
 
 emailVerificationRouter.post(
   "/email-verification",
-  async (req, res, next) => {
-    const user = res.locals.user;
-
-    if (!user) return res.sendStatus(401);
-
-    const rateLimitEntries = await db
-      .select()
-      .from(rateLimit)
-      .where(and(eq(rateLimit.userId, user.id), eq(rateLimit.path, req.path)));
-
-    const entry = rateLimitEntries[0];
-
-    // no entry, i.e. no attempts
-    if (!entry) {
-      await db.insert(rateLimit).values({
-        userId: user.id,
-        path: req.path,
-        attempts: 1,
-        firstAttemptTime: new Date(),
-      });
-      return next();
-    }
-
-    // 1 hour, same duration as email verification code
-    const firstAttemptPlusOneHour =
-      entry.firstAttemptTime.getTime() + 60 * 60 * 1000;
-    const lastAttemptIsWithInAnHourOfFirstAttempt =
-      new Date().getTime() < firstAttemptPlusOneHour;
-
-    // too many attempts within an hour
-    if (lastAttemptIsWithInAnHourOfFirstAttempt) {
-      if (entry.attempts >= 10)
-        return res.status(401).json({
-          message: `Too many attempts, try again at ${new Intl.DateTimeFormat(
-            "en-US",
-            {
-              timeStyle: "long",
-            }
-          ).format(firstAttemptPlusOneHour)}`,
-        });
-      else {
-        await db
-          .update(rateLimit)
-          .set({ attempts: entry.attempts + 1 })
-          .where(eq(rateLimit.id, entry.id));
-        return next();
-      }
-    }
-
-    // last attempt is more than an hour away from first attempt
-    if (!lastAttemptIsWithInAnHourOfFirstAttempt) {
-      await db.delete(rateLimit).where(eq(rateLimit.id, entry.id));
-      await db.insert(rateLimit).values({
-        userId: user.id,
-        path: req.path,
-        attempts: 1,
-        firstAttemptTime: new Date(),
-      });
-      return next();
-    }
-  },
+  rateLimitOnIp,
   async (req, res) => {
     const user = res.locals.user;
 
@@ -106,6 +48,35 @@ emailVerificationRouter.post(
       .json({
         message: "success",
       });
+  }
+);
+
+emailVerificationRouter.post(
+  "/resend-email-verification-code",
+  rateLimitOnIp,
+  async (req, res) => {
+    const userId = res.locals.user?.id;
+    const email = req.body.email;
+
+    if (!userId) return res.status(400).json({ message: "Not logged in" });
+    if (!email) return res.status(400).json({ message: "Email is empty" });
+
+    try {
+      const verificationCode = await generateEmailVerificationCode(
+        userId,
+        email
+      );
+      await sendEmail(email, {
+        subject: "Email Verification Code",
+        text: verificationCode,
+      });
+      res.json({ message: "Email sent" });
+    } catch (e) {
+      console.log(e);
+      res
+        .status(500)
+        .json({ message: "Unable to send email, try again later" });
+    }
   }
 );
 

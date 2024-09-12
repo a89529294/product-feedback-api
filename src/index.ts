@@ -12,6 +12,9 @@ import { resetPasswordRouter } from "./routes/reset-password.js";
 dotenv.config();
 const app = express();
 
+// this is needed for req.ip if deployed behind a proxy
+// app.set('trust proxy', true)
+
 app.use(
   cors({
     origin: ["http://localhost:5173"],

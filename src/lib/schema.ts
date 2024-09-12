@@ -18,7 +18,7 @@ export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at", {
     withTimezone: true,
     mode: "date",
@@ -30,7 +30,7 @@ export const emailVerificationCodes = pgTable("email_verification_codes", {
   code: text("code").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   email: text("email").notNull(),
   expiresAt: timestamp("expires_at", {
     withTimezone: true,
@@ -40,10 +40,7 @@ export const emailVerificationCodes = pgTable("email_verification_codes", {
 
 export const rateLimit = pgTable("rate_limit", {
   id: serial("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  path: text("path").notNull(),
+  ip: text("ip").notNull(),
   attempts: integer("attempts").notNull(),
   firstAttemptTime: timestamp("first_attempt_time", {
     withTimezone: true,
@@ -55,7 +52,7 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: serial("id").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   tokenHash: text("token_hash").notNull(),
   expiresAt: timestamp("expires_at", {
     withTimezone: true,

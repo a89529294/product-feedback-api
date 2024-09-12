@@ -6,10 +6,11 @@ import { db } from "../lib/db.js";
 import { users } from "../lib/schema.js";
 import { isValidEmail } from "../utils.js";
 import { generateEmailVerificationCode, sendEmail } from "../lib/utils.js";
+import { rateLimitOnIp } from "../lib/middlewares.js";
 
 export const signupRouter = express.Router();
 
-signupRouter.post("/signup", async (req, res) => {
+signupRouter.post("/signup", rateLimitOnIp, async (req, res) => {
   const email = req.body.email ?? null;
   const password = req.body.password ?? null;
 

@@ -4,6 +4,8 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
+    "generate": "pnpm exec drizzle-kit generate",
+    "migrate": "pnpm exec drizzle-kit migrate",
     "dev": "tsx watch src/index.ts ",
     "build": "npx tsc",
     "start": "node dist/index.js"
