@@ -28,8 +28,11 @@ signinRouter.post("/signin", async (req, res) => {
   const existingUser = existingUsers[0];
 
   if (!existingUser) {
-    return res.status(401).json({ message: "Incorrect email or password}" });
+    return res.status(401).json({ message: "Incorrect email or password" });
   }
+
+  if (!existingUser.hashedPassword)
+    return res.status(401).json({ message: "should be impossible" });
 
   const validPassword = await verify(existingUser.hashedPassword, password, {
     memoryCost: 19456,

@@ -31,8 +31,10 @@ signinRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, fun
         .where(eq(users.email, email));
     const existingUser = existingUsers[0];
     if (!existingUser) {
-        return res.status(401).json({ message: "Incorrect email or password}" });
+        return res.status(401).json({ message: "Incorrect email or password" });
     }
+    if (!existingUser.hashedPassword)
+        return res.status(401).json({ message: "should be impossible" });
     const validPassword = yield verify(existingUser.hashedPassword, password, {
         memoryCost: 19456,
         timeCost: 2,

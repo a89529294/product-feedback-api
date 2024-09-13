@@ -17,6 +17,7 @@ import { signinRouter } from "./routes/signin.js";
 import { signoutRouter } from "./routes/signout.js";
 import { emailVerificationRouter } from "./routes/email-verification.js";
 import { resetPasswordRouter } from "./routes/reset-password.js";
+import { githubLoginRouter } from "./routes/login-github.js";
 dotenv.config();
 const app = express();
 // this is needed for req.ip if deployed behind a proxy
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
     return next();
 });
 app.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    // await new Promise((r) => setTimeout(r, 2000));
     var _a;
     const sessionId = lucia.readSessionCookie((_a = req.headers.cookie) !== null && _a !== void 0 ? _a : "");
     if (!sessionId) {
@@ -66,9 +68,11 @@ app.get("/validate-session", (req, res) => __awaiter(void 0, void 0, void 0, fun
     return res.json({
         email: res.locals.user.email,
         emailVerified: res.locals.user.emailVerified,
+        username: res.locals.user.username,
+        githubId: res.locals.user.githubId,
     });
 }));
-app.use(signupRouter, signinRouter, signoutRouter, emailVerificationRouter, resetPasswordRouter);
+app.use(signupRouter, signinRouter, signoutRouter, emailVerificationRouter, resetPasswordRouter, githubLoginRouter);
 const port = process.env.PORT;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

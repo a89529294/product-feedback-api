@@ -8,6 +8,7 @@ import { signinRouter } from "./routes/signin.js";
 import { signoutRouter } from "./routes/signout.js";
 import { emailVerificationRouter } from "./routes/email-verification.js";
 import { resetPasswordRouter } from "./routes/reset-password.js";
+import { githubLoginRouter } from "./routes/signin-github.js";
 
 dotenv.config();
 const app = express();
@@ -42,6 +43,8 @@ app.use((req, res, next) => {
 });
 
 app.use(async (req, res, next) => {
+  // await new Promise((r) => setTimeout(r, 2000));
+
   const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
 
   if (!sessionId) {
@@ -76,6 +79,8 @@ app.get("/validate-session", async (req, res) => {
   return res.json({
     email: res.locals.user.email,
     emailVerified: res.locals.user.emailVerified,
+    username: res.locals.user.username,
+    githubId: res.locals.user.githubId,
   });
 });
 
@@ -84,7 +89,8 @@ app.use(
   signinRouter,
   signoutRouter,
   emailVerificationRouter,
-  resetPasswordRouter
+  resetPasswordRouter,
+  githubLoginRouter
 );
 
 const port = process.env.PORT;

@@ -19,3 +19,12 @@
 
 1. `npx drizzle-kit generate`
 2. `npx drizzle-kit migrate`
+
+## Before Deployment
+
+1. make sure localhost:5173 is replaced by where the frontend is deployed
+
+## Setting up github oauth
+
+1. [create github oauth app](https://github.com/settings/developers)
+2. [follow guide](https://lucia-auth.com/guides/oauth/basics)

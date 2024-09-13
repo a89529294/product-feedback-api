@@ -78,6 +78,20 @@
       "when": 1726118526037,
       "tag": "0010_spooky_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1726195704001,
+      "tag": "0011_fine_lord_hawal",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1726197085325,
+      "tag": "0012_eager_firebird",
+      "breakpoints": true
     }
   ]
 }
