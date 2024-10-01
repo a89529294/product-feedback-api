@@ -1,5 +1,5 @@
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
-import { GitHub } from "arctic";
+import { GitHub, Google } from "arctic";
 import { Lucia } from "lucia";
 import { db } from "./db.js";
 import { sessions, users } from "./schema.js";
@@ -16,9 +16,10 @@ export const lucia = new Lucia(adapter, {
         return {
             email: attributes.email,
             emailVerified: attributes.emailVerified,
-            githubId: attributes.githubId,
+            oauthProviderName: attributes.oauthProviderName,
             username: attributes.username,
         };
     },
 });
 export const github = new GitHub(process.env.GITHUB_CLIENT_ID, process.env.GITHUB_CLIENT_SECRET);
+export const google = new Google(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, "http://localhost:3000/login/google/callback");

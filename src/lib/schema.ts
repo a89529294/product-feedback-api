@@ -2,6 +2,7 @@ import {
   boolean,
   integer,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -9,12 +10,30 @@ import {
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
-  email: text("email").unique(),
-  hashedPassword: text("hashed_password"),
-  emailVerified: boolean("email_verified"),
   username: text("username"),
-  githubId: integer("github_id").unique(),
+  email: text("email").unique(),
+  emailVerified: boolean("email_verified"),
+  hashedPassword: text("hashed_password"),
+  oauthProviderName: text("oauth_provider_name"),
 });
+
+export const oauthAccounts = pgTable(
+  "oauth_accounts",
+  {
+    providerName: text("provider_name").notNull(),
+    providerUserId: text("provider_user_id").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({
+        columns: [table.providerName, table.providerUserId],
+      }),
+    };
+  }
+);
 
 export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(),

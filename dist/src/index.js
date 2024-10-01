@@ -17,7 +17,8 @@ import { signinRouter } from "./routes/signin.js";
 import { signoutRouter } from "./routes/signout.js";
 import { emailVerificationRouter } from "./routes/email-verification.js";
 import { resetPasswordRouter } from "./routes/reset-password.js";
-import { githubLoginRouter } from "./routes/login-github.js";
+import { githubLoginRouter } from "./routes/signin-github.js";
+import { googleLoginRouter } from "./routes/signin-google.js";
 dotenv.config();
 const app = express();
 // this is needed for req.ip if deployed behind a proxy
@@ -69,10 +70,10 @@ app.get("/validate-session", (req, res) => __awaiter(void 0, void 0, void 0, fun
         email: res.locals.user.email,
         emailVerified: res.locals.user.emailVerified,
         username: res.locals.user.username,
-        githubId: res.locals.user.githubId,
+        oauthProviderName: res.locals.user.oauthProviderName,
     });
 }));
-app.use(signupRouter, signinRouter, signoutRouter, emailVerificationRouter, resetPasswordRouter, githubLoginRouter);
+app.use(signupRouter, signinRouter, signoutRouter, emailVerificationRouter, resetPasswordRouter, githubLoginRouter, googleLoginRouter);
 const port = process.env.PORT;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

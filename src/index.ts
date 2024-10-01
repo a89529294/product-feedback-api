@@ -9,6 +9,7 @@ import { signoutRouter } from "./routes/signout.js";
 import { emailVerificationRouter } from "./routes/email-verification.js";
 import { resetPasswordRouter } from "./routes/reset-password.js";
 import { githubLoginRouter } from "./routes/signin-github.js";
+import { googleLoginRouter } from "./routes/signin-google.js";
 
 dotenv.config();
 const app = express();
@@ -80,7 +81,7 @@ app.get("/validate-session", async (req, res) => {
     email: res.locals.user.email,
     emailVerified: res.locals.user.emailVerified,
     username: res.locals.user.username,
-    githubId: res.locals.user.githubId,
+    oauthProviderName: res.locals.user.oauthProviderName,
   });
 });
 
@@ -90,7 +91,8 @@ app.use(
   signoutRouter,
   emailVerificationRouter,
   resetPasswordRouter,
-  githubLoginRouter
+  githubLoginRouter,
+  googleLoginRouter
 );
 
 const port = process.env.PORT;
